@@ -1,0 +1,17 @@
+{
+  "project": "hello_ios",
+  "platform": "ios",
+  "github": {
+    "owner": "momo14681",
+    "repo": "hello_ios"
+  },
+  "ios": {
+    "path": "ios"
+  },
+  "flutter": {
+    "version": "3.41.3",
+    "watch": {}
+  },
+  "reactNative": {},
+  "mobai": {}
+}
