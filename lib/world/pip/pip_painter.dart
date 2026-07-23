@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
 import '../../domain/wardrobe.dart';
+import 'pip_carried.dart';
 import 'pip_hats.dart';
 import 'pip_params.dart';
 
@@ -71,6 +72,7 @@ abstract final class PipArt {
     PipPose pose,
     double time, {
     double night = 0,
+    double lanternLit = 0,
     PipOutfit outfit = PipOutfit.base,
   }) {
     final traits = PipPoseTraits.of(pose);
@@ -107,7 +109,9 @@ abstract final class PipArt {
     canvas.restore();
 
     _arm(canvas, p, traits, phase, bodyY, outfit, back: false);
-    if (p.showLantern) _lantern(canvas, p, traits, phase, bodyY, night, outfit);
+    if (p.showLantern) {
+      _carried(canvas, p, traits, phase, bodyY, lanternLit, outfit);
+    }
     _effect(canvas, traits, bodyY, time);
 
     canvas.restore();
@@ -657,17 +661,17 @@ abstract final class PipArt {
     canvas.drawPath(path, Paint()..color = color);
   }
 
-  /// La lanterne, suspendue à la main avant, **hors** de la silhouette.
+  /// L'objet porté par la main avant, **hors** de la silhouette : posé sur le
+  /// corps, il se lit comme une excroissance.
   ///
-  /// Elle s'allume quand le ciel s'assombrit : c'est le lien visible entre Pip
-  /// et l'heure réelle du téléphone.
-  static void _lantern(
+  /// Gourde le jour, lanterne la nuit — voir [PipCarried].
+  static void _carried(
     Canvas canvas,
     PipParams p,
     PipPoseTraits traits,
     double phase,
     double bodyY,
-    double night,
+    double lit,
     PipOutfit outfit,
   ) {
     final origin = _shoulder(bodyY, back: false);
@@ -677,54 +681,11 @@ abstract final class PipArt {
     canvas.rotate(_armAngle(p, traits, phase, back: false));
     canvas.translate(0, _armH + 1);
 
-    if (night > 0.02) {
-      const glowCentre = Offset(0, 6);
-      final radius = 20 * night;
-      canvas.drawCircle(
-        glowCentre,
-        radius,
-        Paint()
-          ..shader =
-              RadialGradient(
-                colors: [
-                  AppColors.lanternGlow.withValues(alpha: 0.5 * night),
-                  AppColors.lanternGlow.withValues(alpha: 0),
-                ],
-              ).createShader(
-                Rect.fromCircle(center: glowCentre, radius: radius),
-              ),
-      );
-    }
-
-    canvas.drawPath(
-      Path()
-        ..moveTo(-3.2, 1)
-        ..quadraticBezierTo(0, -3.5, 3.2, 1),
-      Paint()
-        ..color = AppColors.lanternFrame
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4
-        ..strokeCap = StrokeCap.round,
-    );
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: const Offset(0, 6), width: 9.5, height: 11),
-        const Radius.circular(3),
-      ),
-      Paint()..color = AppColors.lanternFrame,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: const Offset(0, 6), width: 6, height: 7),
-        const Radius.circular(1.8),
-      ),
-      Paint()
-        ..color = Color.lerp(
-          outfit.lantern.withValues(alpha: 0.4),
-          outfit.lantern,
-          night,
-        )!,
+    PipCarried.paint(
+      canvas,
+      lit: lit,
+      style: outfit.lanternStyle,
+      glass: outfit.lantern,
     );
 
     canvas.restore();
@@ -738,6 +699,7 @@ class PipPainter extends CustomPainter {
     required this.pose,
     required this.params,
     this.night = 0,
+    this.lanternLit = 0,
     this.outfit = PipOutfit.base,
   });
 
@@ -745,6 +707,7 @@ class PipPainter extends CustomPainter {
   final PipPose pose;
   final PipParams params;
   final double night;
+  final double lanternLit;
   final PipOutfit outfit;
 
   @override
@@ -756,6 +719,7 @@ class PipPainter extends CustomPainter {
       pose,
       time,
       night: night,
+      lanternLit: lanternLit,
       outfit: outfit,
     );
   }
@@ -766,5 +730,6 @@ class PipPainter extends CustomPainter {
       old.pose != pose ||
       old.params != params ||
       old.night != night ||
+      old.lanternLit != lanternLit ||
       old.outfit != outfit;
 }

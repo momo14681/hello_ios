@@ -51,8 +51,8 @@ class PipParams {
   const PipParams({
     this.scale = 1.0,
     this.walkSpeed = 1.6,
-    this.bobAmplitude = 3.2,
-    this.squash = 0.05,
+    this.bobAmplitude = 2.9,
+    this.squash = 0.010,
     this.legSwing = 5.0,
     this.armSwing = 4.0,
     this.eyeRadius = 4.7,

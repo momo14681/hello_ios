@@ -125,6 +125,7 @@ class WorldPainter extends CustomPainter {
       pose,
       clock.time,
       night: night,
+      lanternLit: SkyPalette.lanternFactor(hour),
       outfit: outfit,
     );
 

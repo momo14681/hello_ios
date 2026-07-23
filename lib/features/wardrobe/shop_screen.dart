@@ -205,6 +205,9 @@ class _Preview extends StatelessWidget {
         time: time,
         pose: PipPose.idle,
         params: const PipParams(scale: 2.2),
+        // Lanterne allumée dans l'aperçu : on n'achète pas un objet qu'on ne
+        // voit pas.
+        lanternLit: 1,
         outfit: outfit,
       ),
     ),

@@ -144,6 +144,8 @@ abstract final class WardrobeCatalog {
   );
 
   // ---- Lanternes ----
+  // Chaque modèle a sa **silhouette**, pas seulement sa teinte : trois
+  // pastilles de couleur, c'était trois fois le même objet en boutique.
   static const lanternWarm = ShopItem(
     id: 'lantern_warm',
     name: 'Flamme',
@@ -151,6 +153,7 @@ abstract final class WardrobeCatalog {
     price: 0,
     freeByDefault: true,
     color: AppColors.lanternGlass,
+    lanternStyle: LanternStyle.classic,
   );
   static const lanternBlue = ShopItem(
     id: 'lantern_blue',
@@ -158,13 +161,33 @@ abstract final class WardrobeCatalog {
     kind: ItemKind.lantern,
     price: 45,
     color: Color(0xFF8FD6F0),
+    lanternStyle: LanternStyle.classic,
   );
-  static const lanternGreen = ShopItem(
-    id: 'lantern_green',
-    name: 'Luciole',
+  static const lanternPaper = ShopItem(
+    id: 'lantern_paper',
+    name: 'Lampion',
     kind: ItemKind.lantern,
-    price: 45,
+    price: 75,
+    color: Color(0xFFF2A65A),
+    lanternStyle: LanternStyle.paper,
+  );
+  // L'identifiant reste `lantern_green` : le renommer ferait perdre l'article
+  // à qui l'avait déjà acheté.
+  static const lanternFirefly = ShopItem(
+    id: 'lantern_green',
+    name: 'Bocal à lucioles',
+    kind: ItemKind.lantern,
+    price: 95,
     color: Color(0xFFA8E06A),
+    lanternStyle: LanternStyle.fireflyJar,
+  );
+  static const lanternCrystal = ShopItem(
+    id: 'lantern_crystal',
+    name: 'Cristal',
+    kind: ItemKind.lantern,
+    price: 150,
+    color: Color(0xFFC9A8F0),
+    lanternStyle: LanternStyle.crystal,
   );
 
   // ---- Itinéraires ----
@@ -187,7 +210,7 @@ abstract final class WardrobeCatalog {
     noHat, beanie, straw, explorer, crown,
     riverStone, slate, moss, ember, amethyst,
     pennantCoral, pennantSky, pennantMint, pennantGold,
-    lanternWarm, lanternBlue, lanternGreen,
+    lanternWarm, lanternBlue, lanternPaper, lanternFirefly, lanternCrystal,
     desert, shelf,
   ];
 
@@ -244,7 +267,10 @@ abstract final class WardrobeCatalog {
         case ItemKind.pennant:
           outfit = outfit.copyWith(pennant: item.color);
         case ItemKind.lantern:
-          outfit = outfit.copyWith(lantern: item.color);
+          outfit = outfit.copyWith(
+            lantern: item.color,
+            lanternStyle: item.lanternStyle,
+          );
         case ItemKind.expedition:
           break;
       }

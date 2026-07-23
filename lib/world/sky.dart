@@ -67,6 +67,30 @@ class SkyPalette {
     return h < 6 || h > 20;
   }
 
+  /// Heure d'allumage et d'extinction de la lanterne.
+  static const lanternOnHour = 18.0;
+  static const lanternOffHour = 7.0;
+
+  /// Intensité de la lanterne, de 0 (éteinte) à 1 (pleine).
+  ///
+  /// Distincte de [nightFactor] : le ciel s'assombrit progressivement au fil du
+  /// crépuscule, alors qu'une lanterne s'allume à une heure décidée. Les
+  /// rampes sont courtes — une demi-heure — pour que l'échange avec la gourde
+  /// de jour ne se remarque pas.
+  static double lanternFactor(double hour) {
+    const ramp = 0.5;
+    final h = hour % 24;
+
+    if (h >= lanternOnHour) {
+      return ((h - lanternOnHour) / ramp).clamp(0.0, 1.0);
+    }
+    if (h < lanternOffHour - ramp) return 1;
+    if (h < lanternOffHour) {
+      return ((lanternOffHour - h) / ramp).clamp(0.0, 1.0);
+    }
+    return 0;
+  }
+
   /// Obscurité continue, de 0 (plein jour) à 1 (nuit noire).
   ///
   /// Pilote l'apparition des étoiles et l'allumage de la lanterne de Pip.

@@ -169,6 +169,40 @@ void main() {
     });
   });
 
+  test('la planche des objets portés se rend', () async {
+    // Rangée du haut : la gourde de jour, puis les quatre lanternes.
+    final carried = <(double, LanternStyle, Color)>[
+      (0, LanternStyle.classic, WardrobeCatalog.lanternWarm.color!),
+      (1, LanternStyle.classic, WardrobeCatalog.lanternWarm.color!),
+      (1, LanternStyle.classic, WardrobeCatalog.lanternBlue.color!),
+      (1, LanternStyle.paper, WardrobeCatalog.lanternPaper.color!),
+      (1, LanternStyle.fireflyJar, WardrobeCatalog.lanternFirefly.color!),
+      (1, LanternStyle.crystal, WardrobeCatalog.lanternCrystal.color!),
+    ];
+
+    await render('pip_carried', const Size(900, 320), (canvas, size) {
+      canvas.drawRect(
+        Offset.zero & size,
+        Paint()..color = const Color(0xFF2E2A44),
+      );
+      for (var i = 0; i < carried.length; i++) {
+        final (lit, style, glass) = carried[i];
+        PipArt.paint(
+          canvas,
+          Offset(90 + i * 145.0, 250),
+          const PipParams(scale: 1.9),
+          PipPose.idle,
+          1.35,
+          lanternLit: lit,
+          outfit: PipOutfit.base.copyWith(
+            lantern: glass,
+            lanternStyle: style,
+          ),
+        );
+      }
+    });
+  });
+
   test('la planche des réactions se rend', () async {
     // Ordre de lecture : arrêt, marche, camp, cairn, étonné,
     // puis choc, douleur, fatigue, joie.

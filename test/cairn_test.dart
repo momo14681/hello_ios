@@ -130,6 +130,26 @@ void main() {
       expect(SkyPalette.isNight(13), isFalse);
     });
 
+    test('la lanterne s\'allume de 18 h à 7 h', () {
+      expect(SkyPalette.lanternFactor(12), 0, reason: 'midi : éteinte');
+      expect(SkyPalette.lanternFactor(17.9), 0, reason: 'avant 18 h : éteinte');
+      expect(SkyPalette.lanternFactor(18.5), 1, reason: 'rampe finie à 18h30');
+      expect(SkyPalette.lanternFactor(23), 1);
+      expect(SkyPalette.lanternFactor(3), 1, reason: 'pleine nuit');
+      expect(SkyPalette.lanternFactor(6.5), 1, reason: 'juste avant la rampe');
+      expect(SkyPalette.lanternFactor(7), 0, reason: '7 h : éteinte');
+      expect(SkyPalette.lanternFactor(9), 0);
+    });
+
+    test('la rampe de la lanterne est monotone', () {
+      var previous = SkyPalette.lanternFactor(18);
+      for (var i = 1; i <= 10; i++) {
+        final value = SkyPalette.lanternFactor(18 + i * 0.05);
+        expect(value, greaterThanOrEqualTo(previous));
+        previous = value;
+      }
+    });
+
     test('le sol est déterministe et continu', () {
       final ground = LandscapeSpec.standard.ground;
       final a = ground.yAt(100, 0, 400);

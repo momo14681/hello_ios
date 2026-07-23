@@ -5,6 +5,25 @@ import '../design/tokens.dart';
 /// Les coiffes disponibles pour Pip. Toutes dessinées en code.
 enum PipHat { none, beanie, straw, explorer, crown }
 
+/// La forme de la lanterne portée la nuit.
+///
+/// La couleur seule ne suffisait pas à distinguer les articles de la boutique :
+/// trois pastilles de couleur, c'est trois fois le même objet. Chaque modèle a
+/// désormais sa silhouette.
+enum LanternStyle {
+  /// Lanterne à cadre métallique.
+  classic,
+
+  /// Lampion de papier, cerclé de nervures.
+  paper,
+
+  /// Bocal à lucioles, piqueté de points lumineux.
+  fireflyJar,
+
+  /// Éclat de cristal facetté.
+  crystal,
+}
+
 /// Ce que porte Pip. Résolu depuis l'inventaire, consommé par le painter.
 class PipOutfit {
   const PipOutfit({
@@ -15,6 +34,7 @@ class PipOutfit {
     this.strap = AppColors.pipStrap,
     this.pennant = AppColors.pipPennant,
     this.lantern = AppColors.lanternGlass,
+    this.lanternStyle = LanternStyle.classic,
   });
 
   final PipHat hat;
@@ -24,6 +44,7 @@ class PipOutfit {
   final Color strap;
   final Color pennant;
   final Color lantern;
+  final LanternStyle lanternStyle;
 
   static const base = PipOutfit();
 
@@ -35,6 +56,7 @@ class PipOutfit {
     Color? strap,
     Color? pennant,
     Color? lantern,
+    LanternStyle? lanternStyle,
   }) => PipOutfit(
     hat: hat ?? this.hat,
     bodyTop: bodyTop ?? this.bodyTop,
@@ -43,6 +65,7 @@ class PipOutfit {
     strap: strap ?? this.strap,
     pennant: pennant ?? this.pennant,
     lantern: lantern ?? this.lantern,
+    lanternStyle: lanternStyle ?? this.lanternStyle,
   );
 }
 
@@ -86,6 +109,7 @@ class ShopItem {
     this.hat,
     this.palette,
     this.color,
+    this.lanternStyle,
     this.expeditionId,
     this.freeByDefault = false,
   });
@@ -100,6 +124,7 @@ class ShopItem {
   final PipHat? hat;
   final PipPalette? palette;
   final Color? color;
+  final LanternStyle? lanternStyle;
   final String? expeditionId;
 
   /// Possédé dès la première ouverture, sans achat.
