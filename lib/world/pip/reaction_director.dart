@@ -70,6 +70,17 @@ class ReactionDirector {
     return out;
   }
 
+  /// Rang de l'incident actif, ou `null` si Pip marche normalement.
+  ///
+  /// Sert de graine à sa réplique : elle change d'un incident au suivant, mais
+  /// reste la même tout au long d'un incident donné.
+  int? eventIndexAt(Duration elapsed) {
+    for (var i = 0; i < events.length; i++) {
+      if (elapsed >= events[i].at && elapsed < events[i].end) return i;
+    }
+    return null;
+  }
+
   /// La pose de Pip après [elapsed] de session en cours.
   PipPose poseAt(Duration elapsed) {
     for (final event in events) {

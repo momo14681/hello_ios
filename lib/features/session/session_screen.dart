@@ -99,6 +99,15 @@ class _SessionScreenState extends ConsumerState<SessionScreen>
     );
   }
 
+  /// Fait changer la réplique d'un incident au suivant, sans qu'elle varie
+  /// pendant un incident donné.
+  int _speechSeed(SessionState s, DateTime now) {
+    final session = s.session;
+    final director = s.director;
+    if (session == null || director == null) return 0;
+    return director.eventIndexAt(session.elapsedAt(now)) ?? 0;
+  }
+
   /// La pose de Pip, dérivée de l'état de session et du temps écoulé.
   PipPose _pose(SessionState s, DateTime now) {
     switch (s.phase) {
@@ -136,6 +145,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen>
               outfit: ref.watch(pipOutfitProvider),
               theme: WorldTheme.forExpedition(expedition?.expedition.id ?? ''),
               bottomInset: _panelInset,
+              speechSeed: _speechSeed(s, now),
             ),
           ),
           // Un Stack plutôt qu'une Column avec Spacer : la Column débordait

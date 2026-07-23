@@ -9,6 +9,7 @@ import '../../design/content_width.dart';
 import '../../design/tokens.dart';
 import '../../domain/expedition.dart';
 import '../../domain/wardrobe.dart';
+import '../../data/purchase/purchase_providers.dart';
 import '../wardrobe/wardrobe_controller.dart';
 import 'expedition_controller.dart';
 import 'trail_painter.dart';
@@ -71,6 +72,7 @@ class _ExpeditionPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inventory = ref.watch(wardrobeControllerProvider).value;
+    final plus = ref.watch(isPlusProvider);
     final activeId = ref
         .watch(expeditionControllerProvider)
         .value
@@ -87,8 +89,12 @@ class _ExpeditionPicker extends ConsumerWidget {
                 expedition: expedition,
                 active: expedition.id == activeId,
                 unlocked: inventory == null
-                    ? expedition.id == ExpeditionCatalog.initial.id
-                    : WardrobeCatalog.ownsExpedition(inventory, expedition.id),
+                    ? plus || expedition.id == ExpeditionCatalog.initial.id
+                    : WardrobeCatalog.ownsExpedition(
+                        inventory,
+                        expedition.id,
+                        plus: plus,
+                      ),
                 onPick: () async {
                   await ref
                       .read(expeditionControllerProvider.notifier)
@@ -131,7 +137,7 @@ class _ExpeditionTile extends StatelessWidget {
     subtitle: Text(
       unlocked
           ? '${expedition.subtitle} · ${(expedition.totalMeters / 1000).round()} km'
-          : 'À débloquer dans la garde-robe',
+          : 'À débloquer aux éclats, ou avec Cairn+',
     ),
     trailing: active
         ? const Icon(Icons.check_rounded, color: AppColors.premium)

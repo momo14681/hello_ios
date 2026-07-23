@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,6 +30,22 @@ class _BrokenReminderService implements ReminderService {
   @override
   Future<void> scheduleSessionEnd(DateTime at, Duration planned) async =>
       _boom();
+
+  @override
+  Future<bool?> hasPermission() async => _boom();
+
+  @override
+  Future<void> showRunning({
+    required DateTime endsAt,
+    required Duration planned,
+    Uint8List? avatar,
+  }) async => _boom();
+
+  @override
+  Future<void> clearRunning() async => _boom();
+
+  @override
+  Future<void> sendTestNotification() async => _boom();
 
   @override
   Future<void> cancel() async => _boom();

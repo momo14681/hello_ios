@@ -2,12 +2,14 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../design/tokens.dart';
 import '../domain/wardrobe.dart';
 import 'cairn/cairn_art.dart';
 import 'landscape/decor.dart';
 import 'landscape/landscape_spec.dart';
 import 'pip/pip_painter.dart';
 import 'pip/pip_params.dart';
+import 'pip/pip_speech.dart';
 import 'sky.dart';
 import 'world_clock.dart';
 
@@ -30,6 +32,7 @@ class WorldPainter extends CustomPainter {
     this.outfit = PipOutfit.base,
     this.bottomInset = 0,
     this.autoScalePip = true,
+    this.speechSeed = 0,
   }) : super(repaint: clock);
 
   final WorldClock clock;
@@ -50,6 +53,9 @@ class WorldPainter extends CustomPainter {
   /// Fait suivre la taille de Pip à celle de la fenêtre. Une échelle fixe le
   /// rend minuscule sur un écran de bureau.
   final bool autoScalePip;
+
+  /// Fait varier la réplique de Pip d'un incident à l'autre.
+  final int speechSeed;
 
   /// Espacement des cairns déjà posés, en pixels de monde.
   static const _cairnSpacing = 260.0;
@@ -129,6 +135,8 @@ class WorldPainter extends CustomPainter {
       outfit: outfit,
     );
 
+    _speech(canvas, size, Offset(pipX, groundY));
+
     // L'herbe passe devant Pip : c'est ce qui l'ancre dans le paysage au lieu
     // de le laisser flotter dessus.
     if (showDecor) {
@@ -141,6 +149,66 @@ class WorldPainter extends CustomPainter {
         spec.layers.length,
       );
     }
+  }
+
+  /// La bulle de réplique, au-dessus de la tête.
+  ///
+  /// Dessinée **hors** du repère mis à l'échelle de Pip : le texte doit rester
+  /// lisible quelle que soit la taille du personnage.
+  void _speech(Canvas canvas, Size size, Offset feet) {
+    final line = PipSpeech.lineFor(pose, speechSeed);
+    if (line == null) return;
+
+    final label = TextPainter(
+      text: TextSpan(
+        text: line,
+        style: const TextStyle(
+          fontSize: 13,
+          height: 1.25,
+          color: AppColors.ink,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    )..layout(maxWidth: min(220, size.width - 48));
+
+    const padding = 10.0;
+    const tail = 7.0;
+    final pipHeight = 74 * _scaledParams(size).scale;
+
+    var centre = Offset(feet.dx, feet.dy - pipHeight - 24);
+    // La bulle ne doit jamais sortir du cadre.
+    final half = label.width / 2 + padding;
+    centre = Offset(
+      centre.dx.clamp(half + 8, size.width - half - 8),
+      max(centre.dy, label.height / 2 + padding + 12),
+    );
+
+    final box = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: centre,
+        width: label.width + padding * 2,
+        height: label.height + padding * 2,
+      ),
+      const Radius.circular(12),
+    );
+
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.94);
+    canvas.drawRRect(box, paint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(feet.dx - tail, box.bottom - 1)
+        ..lineTo(feet.dx, box.bottom + tail)
+        ..lineTo(feet.dx + tail, box.bottom - 1)
+        ..close(),
+      paint,
+    );
+
+    label.paint(
+      canvas,
+      Offset(centre.dx - label.width / 2, centre.dy - label.height / 2),
+    );
   }
 
   void _paintSky(Canvas canvas, Size size) {
@@ -251,5 +319,6 @@ class WorldPainter extends CustomPainter {
       old.outfit != outfit ||
       old.bottomInset != bottomInset ||
       old.autoScalePip != autoScalePip ||
+      old.speechSeed != speechSeed ||
       old.pipXFraction != pipXFraction;
 }

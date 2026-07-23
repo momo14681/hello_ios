@@ -214,9 +214,14 @@ abstract final class WardrobeCatalog {
     desert, shelf,
   ];
 
-  /// Un itinéraire est accessible s'il est offert au départ ou s'il a été
-  /// débloqué. Cairn+ court-circuitera ce test le jour du paywall.
-  static bool ownsExpedition(Inventory inventory, String expeditionId) {
+  /// Un itinéraire est accessible s'il est offert au départ, s'il a été
+  /// débloqué aux éclats, ou si l'abonnement Cairn+ est actif.
+  static bool ownsExpedition(
+    Inventory inventory,
+    String expeditionId, {
+    bool plus = false,
+  }) {
+    if (plus) return true;
     if (expeditionId == ExpeditionCatalog.initial.id) return true;
     for (final item in all) {
       if (item.expeditionId == expeditionId) return inventory.has(item.id);

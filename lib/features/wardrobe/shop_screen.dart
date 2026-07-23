@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/purchase/fake_purchase_service.dart';
+import '../../data/purchase/purchase_providers.dart';
+import '../../data/purchase/purchase_service.dart';
+import '../../data/reminders/reminder_providers.dart';
 import '../../data/wardrobe/wardrobe_catalog.dart';
 import '../../design/content_width.dart';
 import '../../design/tokens.dart';
@@ -29,13 +33,7 @@ class ShopScreen extends ConsumerWidget {
         title: const Text('Garde-robe'),
         actions: [
           if (async.value != null) _Purse(shards: async.value!.shards),
-          if (kDebugMode)
-            IconButton(
-              tooltip: 'Créditer 250 éclats (debug)',
-              onPressed: () =>
-                  ref.read(wardrobeControllerProvider.notifier).debugGrant(250),
-              icon: const Icon(Icons.add_circle_outline),
-            ),
+          if (kDebugMode) const _DebugActions(),
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
@@ -46,6 +44,63 @@ class ShopScreen extends ConsumerWidget {
         ),
         _ => const Center(child: CircularProgressIndicator()),
       },
+    );
+  }
+}
+
+/// Raccourcis de développement : bourse, abonnement, notification de test.
+///
+/// Sans eux, éprouver la boutique demanderait des heures de concentration
+/// réelles, et vérifier une notification, d'attendre la fin d'une session.
+class _DebugActions extends ConsumerWidget {
+  const _DebugActions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plus = ref.watch(isPlusProvider);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextButton.icon(
+          onPressed: () {
+            final service = ref.read(purchaseServiceProvider);
+            if (service is FakePurchaseService) {
+              service.debugSet(plus ? Entitlement.free : Entitlement.plus);
+            }
+          },
+          icon: Icon(
+            plus ? Icons.workspace_premium : Icons.workspace_premium_outlined,
+            size: 18,
+          ),
+          label: Text(plus ? 'Cairn+ actif' : 'Cairn+'),
+          style: TextButton.styleFrom(
+            foregroundColor: plus ? AppColors.premium : AppColors.inkSoft,
+          ),
+        ),
+        IconButton(
+          tooltip: 'Notification de test dans 10 s',
+          onPressed: () async {
+            await ref.read(reminderServiceProvider).requestPermission();
+            await ref.read(reminderServiceProvider).sendTestNotification();
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('Notification de test dans 10 secondes'),
+                ),
+              );
+          },
+          icon: const Icon(Icons.notifications_active_outlined),
+        ),
+        IconButton(
+          tooltip: 'Créditer 250 éclats',
+          onPressed: () =>
+              ref.read(wardrobeControllerProvider.notifier).debugGrant(250),
+          icon: const Icon(Icons.add_circle_outline),
+        ),
+      ],
     );
   }
 }
@@ -133,6 +188,7 @@ class _LoadedState extends ConsumerState<_Loaded>
   @override
   Widget build(BuildContext context) {
     final outfit = WardrobeCatalog.outfitOf(widget.inventory);
+    final plus = ref.watch(isPlusProvider);
 
     return ContentWidth(
       max: 620,
@@ -171,6 +227,7 @@ class _LoadedState extends ConsumerState<_Loaded>
                   _ItemCard(
                     item: item,
                     inventory: widget.inventory,
+                    plus: plus,
                     onTap: () => _tap(item),
                   ),
               ],
@@ -218,16 +275,21 @@ class _ItemCard extends StatelessWidget {
   const _ItemCard({
     required this.item,
     required this.inventory,
+    required this.plus,
     required this.onTap,
   });
 
   final ShopItem item;
   final Inventory inventory;
+  final bool plus;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final owned = inventory.has(item.id);
+    // Cairn+ ouvre tous les itinéraires sans les acheter.
+    final owned =
+        inventory.has(item.id) ||
+        (plus && item.kind == ItemKind.expedition);
     final equipped = inventory.isEquipped(item);
     final affordable = inventory.canAfford(item);
 
@@ -288,6 +350,9 @@ class _ItemCard extends StatelessWidget {
   }
 
   String _status(bool owned, bool equipped) {
+    if (item.kind == ItemKind.expedition && plus && !inventory.has(item.id)) {
+      return 'Inclus dans Cairn+';
+    }
     if (equipped) return 'Porté';
     if (owned) {
       return item.kind == ItemKind.expedition ? 'Débloqué' : 'Possédé';

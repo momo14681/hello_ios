@@ -25,6 +25,7 @@ class WorldView extends StatefulWidget {
     this.outfit = PipOutfit.base,
     this.bottomInset = 0,
     this.autoScalePip = true,
+    this.speechSeed = 0,
     this.hourOverride,
   });
 
@@ -51,6 +52,9 @@ class WorldView extends StatefulWidget {
 
   /// Fait suivre la taille de Pip à celle de la fenêtre.
   final bool autoScalePip;
+
+  /// Fait varier la réplique de Pip d'un incident à l'autre.
+  final int speechSeed;
 
   /// Force une heure de la journée. `null` suit l'horloge du téléphone.
   final double? hourOverride;
@@ -109,6 +113,7 @@ class _WorldViewState extends State<WorldView>
             outfit: widget.outfit,
             bottomInset: widget.bottomInset,
             autoScalePip: widget.autoScalePip,
+            speechSeed: widget.speechSeed,
           ),
         ),
       ),

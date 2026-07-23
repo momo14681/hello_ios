@@ -203,6 +203,38 @@ void main() {
     });
   });
 
+  test('les répliques de Pip se rendent', () async {
+    // Fatigue, choc, douleur, étonnement, joie.
+    const poses = [
+      PipPose.tired,
+      PipPose.bumped,
+      PipPose.hurt,
+      PipPose.surprised,
+      PipPose.cheering,
+    ];
+
+    await render('pip_speech', const Size(900, 460), (canvas, size) {
+      for (var i = 0; i < poses.length; i++) {
+        final clock = WorldClock()..advance(time: 1.35, dt: 1, speed: 200);
+        WorldPainter(
+          clock: clock,
+          sky: SkyPalette.forHour(14),
+          hour: 14,
+          params: const PipParams(scale: 1.1),
+          pose: poses[i],
+          pipXFraction: 0.5,
+          showDecor: false,
+          showCairns: false,
+          autoScalePip: false,
+        ).paint(
+          canvas,
+          const Size(180, 230),
+        );
+        canvas.translate(180, 0);
+      }
+    });
+  });
+
   test('la planche des réactions se rend', () async {
     // Ordre de lecture : arrêt, marche, camp, cairn, étonné,
     // puis choc, douleur, fatigue, joie.

@@ -6,7 +6,9 @@ import '../../data/reminders/reminder_providers.dart';
 import '../../data/reminders/reminder_service.dart';
 import '../../domain/expedition.dart';
 import '../../domain/session.dart';
+import '../../world/pip/pip_snapshot.dart';
 import '../../world/pip/reaction_director.dart';
+import '../../world/sky.dart';
 import '../expedition/expedition_controller.dart';
 import '../wardrobe/wardrobe_controller.dart';
 
@@ -104,9 +106,35 @@ class SessionController extends Notifier<SessionState> {
       lastReward: 0,
     );
 
+    final endsAt = now.add(state.selected);
+
     // Le rappel permet d'être prévenu app fermée. Il est inerte sur le web.
-    _reminder(
-      (s) => s.scheduleSessionEnd(now.add(state.selected), state.selected),
+    _reminder((s) => s.scheduleSessionEnd(endsAt, state.selected));
+    _showRunning(endsAt, state.selected);
+  }
+
+  /// Publie la notification permanente à décompte, Pip en grande icône.
+  ///
+  /// L'image est rendue par le **même code** que le reste de l'app : la
+  /// notification n'affiche qu'un PNG, il n'y a pas de second Pip à maintenir
+  /// en natif.
+  void _showRunning(DateTime endsAt, Duration planned) {
+    final outfit = ref.read(pipOutfitProvider);
+    final now = DateTime.now();
+    final lit = SkyPalette.lanternFactor(now.hour + now.minute / 60);
+
+    unawaited(
+      Future<void>(() async {
+        final avatar = await PipSnapshot.render(
+          outfit: outfit,
+          lanternLit: lit,
+        );
+        await ref.read(reminderServiceProvider).showRunning(
+          endsAt: endsAt,
+          planned: planned,
+          avatar: avatar,
+        );
+      }).catchError((Object _) {}),
     );
   }
 
@@ -143,6 +171,7 @@ class SessionController extends Notifier<SessionState> {
       lastDistance: distance,
     );
     _reminder((s) => s.cancel());
+    _reminder((s) => s.clearRunning());
 
     final legs = await ref
         .read(expeditionControllerProvider.notifier)
@@ -171,6 +200,7 @@ class SessionController extends Notifier<SessionState> {
       lastDistance: distance,
     );
     _reminder((s) => s.cancel());
+    _reminder((s) => s.clearRunning());
 
     final legs = await ref
         .read(expeditionControllerProvider.notifier)
