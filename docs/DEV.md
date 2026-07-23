@@ -142,6 +142,29 @@ l'écoulé à la demande. C'est ce qui le rend immunisé à la suspension de l'a
 Ne pas introduire de compteur qui s'incrémente — ça casserait la session dès que le
 téléphone se verrouille.
 
+## Reprendre le travail
+
+État au 23 juillet 2026.
+
+**Ce qui tourne :** Windows, web, Android (APK de debug produit). iOS via GitHub
+Actions, sideloadé avec un compte Apple gratuit — voir `.github/workflows/ios-build.yml`.
+`flutter analyze` propre, 61 tests.
+
+**À vérifier en priorité sur appareil**, jamais éprouvé ailleurs qu'en compilation :
+- la notification permanente à décompte sur Android, Pip en grande icône
+- les répliques de Pip pendant une session (un incident vers la 1re minute)
+- la mise en page sur un vrai ratio de téléphone
+
+**Suites prévues :** Phase 5 (onboarding animé), Phase 6 (statistiques, réglages,
+ambiances sonores), Phase 7 (paywall, compte Apple Developer, soumission).
+
+**En suspens :** la Live Activity iOS. Faisable **même sur compte gratuit** pour du
+texte et un minuteur — `ActivityAttributes` transmet les données par l'API, aucun App
+Group requis. Le seul blocage réel est l'ajout d'une cible Widget Extension au projet
+Xcode depuis Windows ; contournable par un script Ruby `xcodeproj` lancé sur le runner
+macOS de la CI. `PipSnapshot` produit déjà l'image qu'elle consommerait. Reporté après
+les phases 5 et 6, idéalement le jour où un Mac sera accessible.
+
 ## État d'avancement
 
 - [x] **Phase 0** — architecture, jetons, thème, routeur, `PurchaseService` factice
