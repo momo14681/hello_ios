@@ -48,3 +48,6 @@ app.*.map.json
 builder.exe
 dist/
 
+
+# Réglages Claude Code propres à la machine
+.claude/settings.local.json
