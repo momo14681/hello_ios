@@ -17,7 +17,8 @@ enum SessionPhase {
   /// Session en cours, Pip marche.
   running,
 
-  /// L'utilisateur a quitté l'app : Pip a monté le camp. Jamais punitif.
+  /// L'utilisateur a arrêté la session lui-même : Pip a monté le camp.
+  /// Jamais punitif.
   camped,
 
   /// Session menée à son terme : le cairn est posé.
@@ -121,9 +122,15 @@ class SessionController extends Notifier<SessionState> {
     );
   }
 
-  /// L'utilisateur a quitté l'application. Pip monte le camp là où il est :
-  /// la distance reste acquise, mais aucun cairn n'est posé.
-  Future<void> leaveApp() async {
+  /// Arrêt volontaire. Pip monte le camp là où il est : la distance reste
+  /// acquise, mais aucun cairn n'est posé.
+  ///
+  /// **Rien ne déclenche cela automatiquement.** Verrouiller son téléphone ou
+  /// passer à une autre app produit le même `AppLifecycleState.paused` sur
+  /// iOS : impossible de les distinguer. Or poser son téléphone est
+  /// exactement ce qu'on attend d'une app de concentration — l'abandon
+  /// automatique punissait le bon comportement.
+  Future<void> camp() async {
     final s = state.session;
     if (s == null || !s.isRunning) return;
 
@@ -181,10 +188,6 @@ class SessionController extends Notifier<SessionState> {
 
     state = state.copyWith(reachedLegs: legs, lastReward: gained);
   }
-
-  /// Abandon volontaire depuis l'interface. Même traitement qu'une sortie
-  /// d'app : Pip campe, sans reproche.
-  Future<void> camp() => leaveApp();
 
   /// Rend la main après le bilan.
   void dismiss() =>

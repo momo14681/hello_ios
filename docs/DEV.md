@@ -219,6 +219,23 @@ Un incident survient toutes les 55 à 135 secondes (choc, étonnement, douleur),
 dans les 40 premières secondes ni dans les 12 dernières. Au-delà de 72 % d'une session
 d'au moins 15 minutes, Pip fatigue.
 
+## Pourquoi rien n'abandonne automatiquement
+
+`didChangeAppLifecycleState` **ne coupe aucune session**. iOS envoie le même
+`AppLifecycleState.paused` au verrouillage de l'écran et au passage vers une autre app :
+le cycle de vie ne permet pas de les distinguer. Or verrouiller son téléphone est le
+comportement idéal pour une app de concentration — l'abandon automatique punissait
+précisément le bon geste.
+
+Camper est donc uniquement volontaire, via le bouton. Sur `resumed`, on appelle
+`completeIfDue` pour clore sans délai une session arrivée à échéance en arrière-plan.
+
+Le test `verrouiller le téléphone n'arrête pas la session` verrouille le cas.
+
+Si l'anti-distraction devient un jour souhaitable, la voie honnête est l'API
+**DeviceActivity / Screen Time** d'iOS — pas de la devinette sur le cycle de vie. Elle
+exige un compte payant et une autorisation Apple spécifique.
+
 ## Notifications
 
 `ReminderService` a deux implémentations : `LocalReminderService` sur mobile et desktop,

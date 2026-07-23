@@ -205,7 +205,7 @@ void main() {
       final c = await _ready();
       final n = c.read(sessionControllerProvider.notifier);
       n.start();
-      await n.leaveApp();
+      await n.camp();
 
       expect(c.read(sessionControllerProvider).phase, SessionPhase.camped);
       expect(c.read(sessionControllerProvider).session!.abandoned, isTrue);

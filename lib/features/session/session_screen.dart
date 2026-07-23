@@ -69,8 +69,14 @@ class _SessionScreenState extends ConsumerState<SessionScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      ref.read(sessionControllerProvider.notifier).leaveApp();
+    // **Aucun abandon automatique.** Verrouiller son téléphone et passer à une
+    // autre app produisent le même `paused` sur iOS : on ne peut pas les
+    // distinguer. Et poser son téléphone est précisément ce qu'on attend d'une
+    // app de concentration — l'abandon automatique punissait le bon geste.
+    // Voir `SessionController.camp`.
+    if (state == AppLifecycleState.resumed) {
+      // La session a pu arriver à échéance pendant qu'on avait le dos tourné.
+      ref.read(sessionControllerProvider.notifier).completeIfDue();
     }
   }
 
@@ -173,8 +179,8 @@ class _SessionScreenState extends ConsumerState<SessionScreen>
     SessionPhase.camped => _OutcomePanel(
       title: 'Pip a monté le camp',
       body:
-          'Tu es sorti de l\'app, alors il s\'est arrêté là où il était. '
-          '${_km(s.lastDistance)} restent acquis — mais pas de cairn cette fois.',
+          'Il s\'est arrêté là où il était. ${_km(s.lastDistance)} restent '
+          'acquis — mais pas de cairn cette fois.',
       action: 'Repartir',
       onAction: ref.read(sessionControllerProvider.notifier).dismiss,
     ),

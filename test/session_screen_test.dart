@@ -143,6 +143,36 @@ void main() {
     await _teardown(tester);
   });
 
+  testWidgets('verrouiller le téléphone n\'arrête pas la session', (
+    tester,
+  ) async {
+    _phone(tester);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await tester.tap(find.text('Partir'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Camper'), findsOneWidget);
+
+    // iOS envoie `inactive` puis `paused` au verrouillage — exactement comme
+    // lorsqu'on bascule vers une autre app. Aucun des deux ne doit abandonner.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(
+      find.text('Camper'),
+      findsOneWidget,
+      reason: 'la session doit survivre au verrouillage',
+    );
+    expect(find.text('Pip a monté le camp'), findsNothing);
+
+    await _teardown(tester);
+  });
+
   testWidgets('choisir une autre durée met à jour la sélection', (
     tester,
   ) async {

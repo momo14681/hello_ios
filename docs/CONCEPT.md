@@ -241,8 +241,14 @@ parallaxe, infini, jamais deux fois le même, et qui pèse zéro octet.
 4. À la fin : Pip s'arrête et **empile un cairn**, pierre après pierre, en ressort
 5. La distance s'ajoute à l'expédition en cours
 
-**Si tu quittes l'app :** Pip monte le camp là où il est. Rien n'est perdu, mais aucun
-cairn n'est posé. (`WidgetsBindingObserver` → `AppLifecycleState.paused`)
+**Mettre le téléphone en veille ne change rien.** La session tourne sur horodatage et
+continue. C'était initialement un abandon automatique — une erreur : iOS envoie le même
+`AppLifecycleState.paused` quand on verrouille l'écran et quand on bascule vers une
+autre app, et **poser son téléphone est exactement ce qu'on attend d'une app de
+concentration**. Le mécanisme punissait le bon geste.
+
+**Camper reste volontaire :** le bouton arrête la session. La distance parcourue reste
+acquise, mais aucun cairn n'est posé.
 
 ### Boucle d'expédition (l'arc long — ce que Forest n'a pas)
 Une expédition est un itinéraire thématique jalonné d'**étapes** placées à des distances
